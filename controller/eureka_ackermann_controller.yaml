@@ -1,0 +1,33 @@
+eureka_ackermann_controller:
+  middle_wheel_track:
+    {
+      type: double,
+      default_value: 0.0,
+      description: "Middle wheel track length. For details see: https://en.wikipedia.org/wiki/Wheelbase",
+      read_only: false,
+      validation: {
+        gt<>: [0.0]
+      }
+    }
+
+  half_wheelbase:
+    {
+      type: double,
+      default_value: 0.0,
+      description: "Distance between middle and front wheels - half of real length of wheelbase. For details see: https://en.wikipedia.org/wiki/Wheelbase",
+      read_only: false,
+      validation: {
+        gt<>: [0.0]
+      }
+    }
+
+  middle_wheels_radius:
+    {
+      type: double,
+      default_value: 0.0,
+      description: "Middle wheels radius.",
+      read_only: false,
+      validation: {
+        gt<>: [0.0]
+      }
+    }
