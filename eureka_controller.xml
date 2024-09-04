@@ -1,0 +1,14 @@
+<library path="eureka_controller">
+    <class name="eureka_controller/Ackermandrive"
+           type="eureka_controller::Ackermandrive"
+           base_class_type="hardware_interface::SystemInterface">
+      <description>
+        Steering controller for Ackermann (car-like) kinematics with two traction and four steering joints.      </description>
+    </class>
+    <class name="eureka_controller/EurekaAckermannController"
+           type="eureka_controller::EurekaAckermannController"
+           base_class_type="controller_interface::ChainableControllerInterface">
+      <description>
+        Steering controller for Ackermann (car-like) kinematics with two traction and four steering joints.      </description>
+    </class>
+  </library>
