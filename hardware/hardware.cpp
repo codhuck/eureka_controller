@@ -1,4 +1,4 @@
-#include "eureka_control_hardware/hardware.hpp"
+#include "eureka_controller/hardware.hpp"
 #include <chrono>
 #include <cmath>
 #include <limits>
@@ -9,20 +9,17 @@
 
 namespace arckermandrive
 {
-  Arckermandrive::Arckermandrive():hardware_interface::SystemInterface{
-   pub = this->create_publisher<std_msgs::msg::UInt8MultiArray>("can_tx", 10);
-   sub= this->create_subscription<std_msgs::msg::UInt8MultiArray>("can_rx", std::bind(&Ackermandrive::callback, this, std::placeholders::_1));
-   pub_2 = this->create_publisher<sensor_msgs::msg::JointState>("wheel_commands", 10);
+  Arckermandrive::Arckermandrive():hardware_interface::SystemInterface(),
+   node_(std::make_shared<rclcpp::Node>("arckermandrive_node")){
+   pub = node_->create_publisher<std_msgs::msg::UInt8MultiArray>("can_tx", 10);
+   sub = node_->create_subscription<std_msgs::msg::UInt8MultiArray>("can_rx", 10, std::bind(&Arckermandrive::callback, this, std::placeholders::_1));
   }
 
-
-
-  void Ackermandrive::callback(const std_msgs::msg::UInt8MultiArray arr)
-  {
+  void Arckermandrive::callback (const std_msgs::msg::UInt8MultiArray::SharedPtr arr) {
     int index=static_cast<int>(arr->data[0]);
     if (index>10 && index<17)
     {
-      float temp=convertFloat16ToFloat32(arr->data[5],arr->data[6])
+      float temp=convertFloat16ToFloat32(arr->data[5],arr->data[6]);
       if (std::isnan(temp))
       {
         temp=0;
@@ -33,7 +30,7 @@ namespace arckermandrive
     }
   }
 
-  float Ackermandrive::convertFloat16ToFloat32(uint8_t byte1, uint8_t byte2) {
+   float Arckermandrive::convertFloat16ToFloat32 (uint8_t byte1, uint8_t byte2) {
         uint16_t h = (static_cast<uint16_t>(byte2) << 8) | byte1;
         uint16_t h_exp = (h & 0x7C00) >> 10; 
         uint16_t h_sig = h & 0x03FF;         
@@ -375,7 +372,7 @@ hardware_interface::CallbackReturn Arckermandrive::on_deactivate(
 }
 
 hardware_interface::return_type Arckermandrive::read(
-  const rclcpp::Time & time, const rclcpp::Duration & period)
+  const rclcpp::Time & /*time*/, const rclcpp::Duration & /*period*/)
 {
   wheel_front_l_.pos=positions[0];
   wheel_front_l_.vel=velocities[0];
@@ -401,11 +398,12 @@ hardware_interface::return_type arckermandrive::Arckermandrive::write(
   vel_ang_wheel={wheel_front_l_.vel_angle_to, wheel_front_r_.vel_angle_to, wheel_middle_l_.vel_angle_to, wheel_middle_r_.vel_angle_to, wheel_rear_l_.vel_angle_to, wheel_rear_r_.vel_angle_to};
   for (size_t i=0;i<6;++i)
   {
-   std::vector<float> arr={vel_filt[i], ang_wheel[i], vel_ang_wheel[i]};
-   std::vector<uint8_t> data=arr
-   std::vector<uint8_t> data(1 + arr.size() * sizeof(float));
-   data[0] = static_cast<uint8_t>(i + 11);
-   std::memcpy(data.data() + 1, arr.data(), arr.size() * sizeof(float));
+   std::vector<uint8_t> data;
+   float arr[3] = {static_cast<float>(vel_filt[i]), 
+                    static_cast<float>(ang_wheel[i]), 
+                    static_cast<float>(vel_ang_wheel[i])};
+   data.push_back(static_cast<uint8_t>(i + 11));
+   data.insert(data.end(), reinterpret_cast<uint8_t*>(arr), reinterpret_cast<uint8_t*>(arr) + sizeof(arr));
    msg.data = data;
    pub->publish(msg); 
   }

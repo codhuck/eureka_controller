@@ -14,7 +14,7 @@ class Wheel
     double cmd = 0;
     double pos = 0;
     double vel = 0;
-    double to_angle = 0;
+    double angle_to = 0;
     double from_angle = 0;
     double rads_per_count = 0;
     double vel_angle_to = 0;

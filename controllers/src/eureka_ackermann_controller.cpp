@@ -1,4 +1,4 @@
-#include "eureka_ackermann_controller/eureka_ackermann_controller.hpp"
+#include "eureka_controller/eureka_ackermann_controller.hpp"
 
 namespace eureka_ackermann_controller
 {
